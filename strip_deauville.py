@@ -44,7 +44,8 @@ def run_deauville_stripping():
     options[1] = 'more_synonyms' #replace more synonyms beyond Deauville
     # options[1] = 'no_synonyms' #don't replace more synonyms
 
-    direct = '/home/tjb129/r-fcb-isilon/research/Bradshaw/Lymphoma_UW_Retrospective/Reports'
+    #direct = '/home/tjb129/r-fcb-isilon/research/Bradshaw/Lymphoma_UW_Retrospective/Reports'
+    direct = 'Z:\Lymphoma_UW_Retrospective\Reports'
     indications_file = 'indications.xlsx'
 
     if options[0] == 'combo':
@@ -126,7 +127,8 @@ def run_deauville_stripping():
     df['impression_processed'] = filtered_findings
     df['deauville'] = deauville_scores
     df = df.set_index('accession')
-    df.to_csv(os.path.join(direct, save_file))
+    #df.to_csv(os.path.join(direct, save_file))
+    df.to_csv(os.path.join("Z:\\Zach_Analysis\\text_data", save_file))
 
 
 def run_split_reports_according_to_ds(options='binary'):

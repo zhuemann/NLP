@@ -1,6 +1,8 @@
 pandas
 openpyxl
 nltk
-sklearn
-csv
+#sklearn
+scikit-learn
+#csv
 pip
+gensim
