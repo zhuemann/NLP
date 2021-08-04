@@ -1,0 +1,6 @@
+pandas
+openpyxl
+nltk
+sklearn
+csv
+pip
