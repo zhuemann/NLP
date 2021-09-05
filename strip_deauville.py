@@ -1,6 +1,7 @@
 from nlp_utils import *
 import os
 import csv
+import re
 from sklearn.model_selection import train_test_split
 from nltk.tokenize import word_tokenize, sent_tokenize
 from classification_model_doc2vec import clean_up_text
@@ -13,14 +14,40 @@ from classification_model_doc2vec import clean_up_text
 # 4. Find all duplicate cases
 
 
+#def highest_deauville(text):
+#    highest = ''
+#    scores_found = 0
+#    for i in range(1, 6):
+#        if text.find('deauvil_score_' + str(i)) > -1:
+#            highest = 'deauvil_score_' + str(i)
+#            scores_found += 1
+#    return highest, scores_found
+
+
 def highest_deauville(text):
-    highest = ''
-    scores_found = 0
-    for i in range(1, 6):
-        if text.find('deauvil_score_' + str(i)) > -1:
-            highest = 'deauvil_score_' + str(i)
-            scores_found += 1
-    return highest, scores_found
+
+    num_scores = 0
+    scores_found = ''
+    #index = text.find('deauvil_score_')
+    indices = [m.start() for m in re.finditer('deauvil_score_', text)]
+    for index in indices:
+        for offset in range(1,6):
+            for ds in range(1, 6):
+                if (index + offset + 13 >= len(text)):
+                    continue
+
+
+                if str(text[index + offset + 13]) == str(ds):
+
+                    if (scores_found.find(str(ds)) > -1):
+                        continue
+
+                    scores_found += str(ds)
+                    num_scores += 1
+                    continue
+
+    return num_scores, scores_found
+
 
 
 def remove_deauville(text_filt):
@@ -58,7 +85,9 @@ def run_deauville_stripping():
     if options[1] == 'more_synonyms':
         save_file = save_file + '_more_syn'
 
+
     save_file = save_file + '.csv'
+
 
     synonyms_file = os.path.join(direct, 'deauville_replacements.xlsx')
     synonyms_sheet = 'ngram'
@@ -68,6 +97,8 @@ def run_deauville_stripping():
 
     # read in full data
     df = pd.read_excel(os.path.join(direct, indications_file), mrn_sheet)
+
+    print(os.path.join(direct, indications_file), mrn_sheet)
 
     # read in synonyms, defined by user
     syns = pd.read_excel(os.path.join(direct, synonyms_file), synonyms_sheet)
@@ -102,7 +133,7 @@ def run_deauville_stripping():
             text_filt = clean_text(text)
             # remove dates
             text_filt = date_stripper(text_filt)
-            # replace with custom synonyms from file
+            # replace with custom synonyms from file-
             text_filt = replace_custom_synonyms(text_filt, words_to_replace, replacements)
             if options[1] == 'more_synonyms':
                 text_filt = replace_custom_synonyms(text_filt, more_words_to_replace, more_replacements)
@@ -113,23 +144,49 @@ def run_deauville_stripping():
             # # contractions
             text_filt = remove_contractions_and_hyphens(text_filt)
             # get the highest deauville score
-            ds, scores_found = highest_deauville(text_filt)
+
+            scores_found, ds = highest_deauville(text_filt)
+
             # remove the deuville scores
-            text_filt = remove_deauville(text_filt)
+
+            #text_filt = remove_deauville(text_filt) # put this line back in later
             filtered_findings.append(text_filt)
-            deauville_scores.append(ds.replace('deauvil_score_', ''))  # store just the number
+
+            #deauville_scores.append(ds.replace('deauvil_score_', ''))  # store just the number
+            deauville_scores.append(ds)
+
             hedging.append(scores_found)
 
     # remove low frequency words
     # filtered_findings = remove_low_frequency_words_and_repeated_words(filtered_findings, freq=10)
     # save
 
+
+
     df['impression_processed'] = filtered_findings
     df['deauville'] = deauville_scores
     df = df.set_index('accession')
     df['num_scores'] = hedging
     # df.to_csv(os.path.join(direct, save_file))
+
     df.to_csv(os.path.join("Z:\\Zach_Analysis\\text_data", save_file))
+
+
+    hedging_report = True
+
+    if hedging_report:
+        #save_file = 'multiple_ds_reports' + '.xlsx'
+        save_file = 'single_ds_reports' '.xlsx'
+
+        # Save the file out if it is greater than 2
+        #df = df[df['num_scores'] >= 2]
+
+
+        df = df[df['num_scores'] == 1]
+
+
+
+    df.to_excel(os.path.join("Z:\\Zach_Analysis\\text_data", save_file))
 
 
 def run_split_reports_according_to_ds(options='binary'):

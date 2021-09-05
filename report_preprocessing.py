@@ -373,7 +373,8 @@ def replace_section_headers(text):
 ####################################################################################
     
 def run(
-    direct = '/home/tjb129/r-fcb-isilon/research/Bradshaw/Lymphoma_UW_Retrospective/Reports',
+    #direct = '/home/tjb129/r-fcb-isilon/research/Bradshaw/Lymphoma_UW_Retrospective/Reports',
+    direct = 'Z:\Lymphoma_UW_Retrospective\Reports',
     indications_file = 'indications.xlsx',
     mrn_sheet = 'lymphoma_uw_finding_or_impres',
 ):
@@ -454,5 +455,5 @@ def run(
     #save
           
     df['impression_processed'] = filtered_findings
-    df.to_excel(os.path.join(direct, save_file), sheet_name=save_sheet)
+    df.to_excel(os.path.join("Z:\\Zach_Analysis\\text_data", save_file), sheet_name=save_sheet)
 
