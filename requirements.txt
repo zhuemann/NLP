@@ -6,3 +6,13 @@ scikit-learn
 #csv
 pip
 gensim
+transformers
+torch
+pytorch-pretrained-bert
+pytorch-nlp
+autograd
+keras
+GPUtil
+keras_radam
+matplotlib
+tensorflow

@@ -1,6 +1,8 @@
 import pandas as pd
 import os
-import re
+
+#import re
+import regex as re
 import string
 
 from nltk.tokenize import word_tokenize, sent_tokenize
