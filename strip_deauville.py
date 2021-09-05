@@ -25,6 +25,7 @@ from classification_model_doc2vec import clean_up_text
 
 
 def highest_deauville(text):
+
     num_scores = 0
     scores_found = ''
     #index = text.find('deauvil_score_')
@@ -46,6 +47,7 @@ def highest_deauville(text):
                     continue
 
     return num_scores, scores_found
+
 
 
 def remove_deauville(text_filt):
@@ -83,8 +85,9 @@ def run_deauville_stripping():
     if options[1] == 'more_synonyms':
         save_file = save_file + '_more_syn'
 
-    #save_file = save_file + '.csv'
-    save_file = save_file + '.xlsx'
+
+    save_file = save_file + '.csv'
+
 
     synonyms_file = os.path.join(direct, 'deauville_replacements.xlsx')
     synonyms_sheet = 'ngram'
@@ -141,13 +144,17 @@ def run_deauville_stripping():
             # # contractions
             text_filt = remove_contractions_and_hyphens(text_filt)
             # get the highest deauville score
+
             scores_found, ds = highest_deauville(text_filt)
+
             # remove the deuville scores
 
             #text_filt = remove_deauville(text_filt) # put this line back in later
             filtered_findings.append(text_filt)
+
             #deauville_scores.append(ds.replace('deauvil_score_', ''))  # store just the number
             deauville_scores.append(ds)
+
             hedging.append(scores_found)
 
     # remove low frequency words
@@ -162,6 +169,9 @@ def run_deauville_stripping():
     df['num_scores'] = hedging
     # df.to_csv(os.path.join(direct, save_file))
 
+    df.to_csv(os.path.join("Z:\\Zach_Analysis\\text_data", save_file))
+
+
     hedging_report = True
 
     if hedging_report:
@@ -173,6 +183,7 @@ def run_deauville_stripping():
 
 
         df = df[df['num_scores'] == 1]
+
 
 
     df.to_excel(os.path.join("Z:\\Zach_Analysis\\text_data", save_file))
