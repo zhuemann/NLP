@@ -2,6 +2,7 @@
 #this is a language model (LM) -- not clasificaiton. It only fine tunes the head.
 
 from transformers import AutoTokenizer, AutoModelWithLMHead
+from transformers import RobertaModel
 import os
 import pandas as pd
 import transformers
@@ -11,14 +12,14 @@ import transformers
 #raw biobert weights are in Lymphoma_UW_Retrospective/Models
 
 def run_fine_tune_with_new_vocab(
-        model_selection = 0, #0=bio_clinical_bert, 1=bio_bert, 2=bert
+        model_selection = 0, #0=bio_clinical_bert, 1=bio_bert, 2=bert,
         num_train_epochs=5,
         per_device_train_batch_size=16,
         vocab_file = '',  #leave blank if no vocab added, otherwise the filename, eg, 'vocab25.csv'
         reports_file = 'findings_and_impressions_wo_ds_more_syn.csv'
 ):
 
-    model_type = ['bio_clinical_bert', 'bio_bert', 'bert']
+    model_type = ['bio_clinical_bert', 'bio_bert', 'bert', 'roberta']
 
     if model_type[model_selection] == 'bio_clinical_bert':
         tokenizer = AutoTokenizer.from_pretrained("emilyalsentzer/Bio_ClinicalBERT")
@@ -29,6 +30,9 @@ def run_fine_tune_with_new_vocab(
     elif model_type[model_selection] == 'bert':
         tokenizer = AutoTokenizer.from_pretrained("/Users/zmh001/Documents/language_models/bert/")
         model = AutoModelWithLMHead.from_pretrained("/Users/zmh001/Documents/language_models/bert/")
+    elif model_type[model_selection] == 'roberta':
+        tokenizer = AutoTokenizer.from_pretrained("/Users/zmh001/Documents/language_models/roberta_large/")
+        model = RobertaModel.from_pretrained("/Users/zmh001/Documents/language_models/roberta_large/")
 
     #get vocab needed to add
     report_direct = 'Z:/Lymphoma_UW_Retrospective/Reports/'

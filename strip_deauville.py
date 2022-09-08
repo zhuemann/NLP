@@ -29,6 +29,7 @@ def highest_deauville(text):
     scores_found = ''
     #index = text.find('deauvil_score_')
     indices = [m.start() for m in re.finditer('deauvil_score_', text)]
+    print(indices)
     for index in indices:
         for offset in range(1,6):
             for ds in range(1, 6):
@@ -175,7 +176,8 @@ def run_deauville_stripping():
         df = df[df['num_scores'] == 1]
 
 
-    df.to_excel(os.path.join("Z:\\Zach_Analysis\\text_data", save_file))
+    #df.to_excel(os.path.join("Z:\\Zach_Analysis\\text_data", save_file))
+
 
 
 def run_split_reports_according_to_ds(options='binary'):
@@ -286,3 +288,7 @@ def interpretability_replace_key_sentences_in_test_dataset(test_fract=0.2,
     df_test_replaced_doc2vec.columns
     df_test_replaced_doc2vec.to_csv(
         os.path.join(report_direct, 'DECOYS_' + 'doc2vec_' + str(len(report_files)) + '_classes.csv'))
+
+
+
+

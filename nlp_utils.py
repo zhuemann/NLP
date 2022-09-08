@@ -85,7 +85,7 @@ def replace_custom_synonyms(text, words_to_replace, replacements):
 
     for i in range(0, len(words_to_replace)):
         word = words_to_replace[i]
-        #        print(word)
+        print(word)
         ind_wild = word.find('*')
         if ind_wild > -1:
             if ind_wild == len(word) - 1:

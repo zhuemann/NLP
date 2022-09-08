@@ -11,6 +11,8 @@ import transformers
 from transformers import AutoTokenizer, AutoModelWithLMHead
 from evaluator import Evaluator
 from classification_model_bert_unchanged import fine_tune_model, test_saved_model
+# from train_deauville_mip_with_arguments import get_classifier_model, str2bool
+# import train_deauville_mip_with_arguments
 import numpy as np
 
 from strip_deauville import run_deauville_stripping
@@ -18,6 +20,11 @@ from strip_deauville import highest_deauville
 from report_preprocessing import run
 from bert_fine_tuning import bert_fine_tuning
 from fine_tune_bert_model_with_new_vocab import run_fine_tune_with_new_vocab
+from five_class_setup_reports import five_class_setup
+from next_sentence_prediction import next_sentence_prediction
+from hedging_utils import run_extract_multiple_ds
+from candid_mlm import bert_fine_tuning_candid
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -26,31 +33,15 @@ if __name__ == '__main__':
     # data = load_data('Z:\Lymphoma_UW_Retrospective\Reports\indications.xlsx')
     # print(data)
     # run_deauville_stripping()
+    # run_deauville_stripping()
     # read in full data
     # run_extract_multiple_ds()
-
+    #five_class_setup()
+    bert_fine_tuning_candid()
     #bert_fine_tuning()
+    #run_fine_tune_with_new_vocab(model_selection=3)
 
-    # model = transformers.AutoModelWithLMHead.from_pretrained('C:/Users/zmh001/Documents/language_models/trained_models/')
-
-    #tokenizer = transformers.AutoTokenizer.from_pretrained('C:/Users/zmh001/Documents/language_models/trained_models/bert_new_vocab/')
-
-
-
-
-    # nlp_fill = transformers.pipeline('fill-mask', model=model, tokenizer=tokenizer)
-    #print(nlp_fill('There is a inflammatory lesion in the patient''s left lung ' + nlp_fill.tokenizer.mask_token))
-    #print(type(nlp_fill('Dan is a ' + nlp_fill.tokenizer.mask_token)))
-
-    #new_string = 'the lesion in the patient '
-    #new_string = 'the meeting on tuesday'
-    #for i in range(0,10):
-
-    #    full_return = nlp_fill(new_string + str(nlp_fill.tokenizer.mask_token))
-    #    return_dict = full_return[0]
-    #    new_string = return_dict['sequence']
-    #    print(new_string)
-
+    #next_sentence_prediction()
 
 
     report_direct = 'Z:/Lymphoma_UW_Retrospective/Reports/'
@@ -76,13 +67,14 @@ if __name__ == '__main__':
     #df.to_csv('Z:/Zach_Analysis/text_data/test_data_binary.csv')
     #df.to_csv('C:/Users/zmh001/Documents/report_data/test_data_binary.csv')
 
-    #run_fine_tune_with_new_vocab()
 
+    # train_deauville_mip_with_arguments()
 
+    # bert_fine_tuning()
     Fine_Tune = False
     if Fine_Tune == True:
         fine_tune_model(
-            model_selection=3,  # 0=bio_clinical_bert, 1=bio_bert, 2=bert
+            model_selection=2,  # 0=bio_clinical_bert, 1=bio_bert, 2=bert
             num_train_epochs=3,
             test_fract=0.2,
             valid_fract=0.1,
@@ -93,10 +85,10 @@ if __name__ == '__main__':
                       'ds45_findings_and_impressions_wo_ds_more_syn.csv']
         )
 
-    Test_Model = True
+    Test_Model = False
     if Test_Model == True:
         test_saved_model(
-            model_selection=3,  # 0=bio_clinical_bert, 1=bio_bert, 2=bert
+            model_selection=2,  # 0=bio_clinical_bert, 1=bio_bert, 2=bert
             test_fract=0.2,
             truncate_left=True,  # truncate the left side of the report/tokens, not the right
             n_nodes=768,  # number of nodes in last classification layer

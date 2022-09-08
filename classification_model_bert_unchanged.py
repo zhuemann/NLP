@@ -29,6 +29,7 @@ from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampl
 from transformers import DistilBertTokenizer, DistilBertModel
 import logging
 logging.basicConfig(level=logging.ERROR)
+from five_class_setup_reports import five_class_setup
 
 
 from torch import cuda
@@ -111,12 +112,12 @@ class BERTClass(torch.nn.Module):
         self.attention = torch.nn.Sequential(
             torch.nn.Linear(768, 512),
             torch.nn.Tanh(),
-            torch.nn.Linear(512, 1),
+            torch.nn.Linear(512, n_class),
             torch.nn.Softmax(dim=1)
         )
 
         self.regressor = torch.nn.Sequential(
-            torch.nn.Linear(768, 1)
+            torch.nn.Linear(768, n_class)
         )
 
     def forward(self, input_ids, attention_mask, token_type_ids):
@@ -140,7 +141,6 @@ class BERTClass(torch.nn.Module):
         # context_vector = torch.sum(weights * last_hidden_state, dim=1)
         # print(context_vector.shape)
         # output = self.regressor(context_vector)
-
         return output
 
 def loss_fn(outputs, targets):
@@ -190,8 +190,8 @@ def fine_tune_model(
         model = BertModel.from_pretrained("dmis-lab/biobert-v1.1")
     elif model_type[model_selection] == 'bert':
         tokenizer = AutoTokenizer.from_pretrained("/Users/zmh001/Documents/language_models/bert/")
-        model = BertModel.from_pretrained("/Users/zmh001/Documents/language_models/bert/")
-        #model = BertModel.from_pretrained("/Users/zmh001/Documents/language_models/trained_models/")
+        # model = BertModel.from_pretrained("/Users/zmh001/Documents/language_models/bert/")
+        model = BertModel.from_pretrained("/Users/zmh001/Documents/language_models/trained_models/bert_pretrained_v2/")
 
    # if we want to expand vocab file
     # report_direct = '/home/tjb129/r-fcb-isilon/research/Bradshaw/Lymphoma_UW_Retrospective/Reports'
@@ -230,6 +230,11 @@ def fine_tune_model(
         # df0 = df0.set_index('id')
         df = pd.concat([df, df0], axis=0, join='outer')
         # df = df0.append(df1)
+    df = df.set_index('id')
+    df = df.sort_values('id')
+    print(df)
+    df = five_class_setup()
+    print(df)
     df = df.set_index('id')
     df = df.sort_values('id')
 
@@ -286,11 +291,13 @@ def fine_tune_model(
     else:
         n_nodes = 768
 
+    n_classes = 5
     #now lets train model
-    model_obj = BERTClass(model, n_classes, n_nodes)
+    model_obj = BERTClass(model, n_class=n_classes, n_nodes=n_nodes)
+    #model_obj = BERTClass(model, n_classes, n_nodes)
     model_obj.to(device)
 
-    optimizer = torch.optim.Adam(params =  model.parameters(), lr=1e-5)
+    optimizer = torch.optim.Adam(params = model.parameters(), lr=1e-5)
 
 
     for epoch in range(num_train_epochs):
@@ -301,11 +308,17 @@ def fine_tune_model(
             token_type_ids = data['token_type_ids'].to(device, dtype = torch.long)
             targets = data['targets'].to(device, dtype = torch.float)
 
-
             outputs = model_obj(ids, mask, token_type_ids)
 
+            print(type(targets))
+            targets = torch.nn.functional.one_hot(input = targets.long(), num_classes = n_classes)
+            print("targets: ")
+            print(targets)
+            print("output")
+            print(outputs)
+
             optimizer.zero_grad()
-            if len(report_files) > 2:
+            if n_classes > 2:
                 loss = loss_fn(outputs, targets)
             else:
                 loss = loss_fn(outputs[:,0], targets)
@@ -329,7 +342,6 @@ def fine_tune_model(
                 outputs = model_obj(ids, mask, token_type_ids)
                 fin_targets.extend(targets.cpu().detach().numpy().tolist())
                 fin_outputs.extend(torch.sigmoid(outputs).cpu().detach().numpy().tolist())
-
             final_outputs = np.array(fin_outputs) > 0.5
             val_hamming_loss = metrics.hamming_loss(fin_targets, final_outputs)
             val_hamming_score = hamming_score(np.array(fin_targets), np.array(final_outputs))
@@ -337,7 +349,7 @@ def fine_tune_model(
             print(f"Epoch {str(epoch)}, Validation Hamming Score = {val_hamming_score}")
             print(f"Epoch {str(epoch)}, Validation Hamming Loss = {val_hamming_loss}")
 
-    torch.save(model_obj.state_dict(), model_direct + '_state_dict_default_weights_untrained_Roberta_overnight')
+    torch.save(model_obj.state_dict(), model_direct + '_state_dict_default_weights_pretrained_v2')
     # torch.save(model_obj, model_direct + '_full_model')
 
 
@@ -446,7 +458,7 @@ def test_saved_model(
     #                            model_type[model_selection] + save_name_extension)
     # model_direct = 'C:/Users/zmh001/Documents/language_models/trained_models/bio_clinical_bert_processed/bert_2_classes_left_trunc_state_dict_kaggle_weights_pretrained_4500'
     # model_direct = 'C:/Users/zmh001/Documents/language_models/trained_models/bio_clinical_bert_processed/bio_clinical_bert_2_classes_left_trunc_state_dict_kaggle_weights_pretrained_4500_v2'
-    model_direct = 'C:/Users/zmh001/Documents/language_models/trained_models/bert_models/roberta_2_classes_left_trunc_state_dict_default_weights_untrained_Roberta_overnight'
+    model_direct = 'C:/Users/zmh001/Documents/language_models/trained_models/bert_models/bert_2_classes_left_trunc_state_dict_default_weights_untrained_v4'
     if len(report_files) > 2:
         n_classes = len(report_files)
     else:

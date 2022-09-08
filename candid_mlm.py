@@ -10,7 +10,7 @@ import torch
 from transformers import get_scheduler
 from transformers import AdamW
 
-def bert_fine_tuning():
+def bert_fine_tuning_candid():
 
     print("hi")
 
@@ -21,17 +21,20 @@ def bert_fine_tuning():
     #tokenizer = AutoTokenizer.from_pretrained("/Users/zmh001/Documents/language_models/roberta_large/")
     #bert = RobertaModel.from_pretrained("/Users/zmh001/Documents/language_models/roberta_large/")
 
-    tokenizer = AutoTokenizer.from_pretrained("/Users/zmh001/Documents/language_models/bio_clinical_bert/", truncation=True)
+    #tokenizer = AutoTokenizer.from_pretrained("/Users/zmh001/Documents/language_models/bio_clinical_bert/", truncation=True)
+    tokenizer = AutoTokenizer.from_pretrained("Z:/Zach_Analysis/roberta/", truncation=True)
     #bert = AutoModelWithLMHead.from_pretrained("/Users/zmh001/Documents/language_models/bio_clinical_bert/")
-    bert = AutoModelWithLMHead.from_pretrained("/Users/zmh001/Documents/language_models/roberta_large/")
-
+    #bert = AutoModelWithLMHead.from_pretrained("/Users/zmh001/Documents/language_models/roberta_large/")
+    bert = AutoModelWithLMHead.from_pretrained("Z:/Zach_Analysis/roberta/")
 
     df = pd.read_excel('Z:/Zach_Analysis/text_data/single_ds_reports.xlsx')
 
     #reports_file = 'single_ds_reports.xlsx'
-    reports_file = 'findings_and_impressions_wo_ds_more_syn.csv'
-    report_direct = 'Z:/Zach_Analysis/text_data/'
-    model_direct = 'C:/Users/zmh001/Documents/language_models/trained_models/bio_clinical_bert_pretrained_v2'
+    #reports_file = 'findings_and_impressions_wo_ds_more_syn.csv'
+    reports_file = 'Pneumothorax_reports.csv'
+    #report_direct = 'Z:/Zach_Analysis/text_data/'
+    report_direct = "Z:/public_datasets/candid_ptx"
+    model_direct = 'Z:/Zach_Analysis/models/candid_mlm/roberta_candid_v2/'
     #model_direct = 'C:/Users/zmh001/Documents/language_models/trained_models/bert_pretrained_v2/'
     #model_direct = 'C:/Users/zmh001/Documents/language_models/trained_models/bert_pretrained_v3/'
 
@@ -43,7 +46,7 @@ def bert_fine_tuning():
         df_report = pd.read_csv(os.path.join(report_direct, reports_file))
         with open(os.path.join(report_direct, text_file), 'w') as w:
             for i, row in df_report.iterrows():
-                entry = str(row["impression_processed"]).replace('\n', ' ')
+                entry = str(row["Report"]).replace('\n', ' ')
                 w.write(entry + '\n')
 
 
@@ -54,6 +57,7 @@ def bert_fine_tuning():
     vocab_file = ''
     #if we want to expand vocab file
     save_name_extension = ''
+    """
     if os.path.exists(os.path.join(report_direct, vocab_file)) and not vocab_file == '' :
         vocab = pd.read_csv(os.path.join(report_direct, vocab_file))
         vocab_list = vocab["Vocab"].to_list()
@@ -69,6 +73,7 @@ def bert_fine_tuning():
         #expand model
         bert.resize_token_embeddings(len(tokenizer))
         save_name_extension = '_new_vocab'
+    """
 
     dataset = transformers.LineByLineTextDataset(
         tokenizer=tokenizer,
@@ -84,10 +89,10 @@ def bert_fine_tuning():
 
     training_args = transformers.TrainingArguments(
         #output_dir='/Users/zmh001/Documents/language_models/trained_models/bert_pretrained_v3/',
-        output_dir='C:/Users/zmh001/Documents/language_models/trained_models/bio_clinical_bert_pretrained_v2/',
+        output_dir=model_direct,
         overwrite_output_dir=True,
         seed = 117,
-        num_train_epochs=3,
+        num_train_epochs=1,
         per_device_train_batch_size=16,
         learning_rate=1e-6,
         warmup_steps=10,

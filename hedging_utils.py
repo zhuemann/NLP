@@ -44,6 +44,7 @@ def run_extract_multiple_ds():
 
             print(text.find('score'))
             num_ds, ds_found = check_hedging(text)
+            print(ds_found)
 
             num_list.append(num_ds)
             scores_found_list.append(ds_found)
